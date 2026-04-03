@@ -1,0 +1,21 @@
+{
+  "name": "event-driven-functions",
+  "version": "1.0.0",
+  "description": "Azure Functions event-driven demo: HTTP → Event Hub → SQL",
+  "main": "dist/src/functions/*.js",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "prestart": "npm run build",
+    "start": "func start"
+  },
+  "dependencies": {
+    "@azure/functions": "^4.0.0",
+    "@azure/event-hubs": "^5.0.0",
+    "mssql": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/mssql": "^9.0.0",
+    "typescript": "^5.0.0"
+  }
+}

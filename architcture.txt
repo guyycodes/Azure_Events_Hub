@@ -1,0 +1,71 @@
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                            OPEN INTERNET                                   │
+│                                                                            │
+│  📱 Your Laptop (mobile hotspot)                                           │
+│  │  IPv4: 174.234.2.119 (✅ in SQL firewall)                              │
+│  │                                                                         │
+│  ├── curl POST /publishEvent ─────────────────────┐                        │
+│  ├── curl GET  /queryData ───────────────────────┐│                        │
+│  │                                               ││                        │
+│  └── mssql (local dev) ─── ✅ ALLOWED ────────┐  ││                        │
+│                             (174.234.2.119 is │  ││                        │
+│                              in the firewall) │  ││                        │
+│                                               │  ││                        │
+├───────────────────────────────────────────────┼──┼┼────────────────────────┤
+│                   AZURE CLOUD                 │  ││                        │
+│                                               │  ││                        │
+│  ┌─ Resource Group: rg-eventdemo-mbeals04030403──┼┼─────────────────────┐  │
+│  │                                            │  ││                     │  │
+│  │  ┌──────────────────────────────────┐      │  ││                     │  │
+│  │  │ Function App (eastus)            │◄─────┼──┘│  ⬜ NOT YET CREATED │  │
+│  │  │ func-eventdemo-mbeals04030403    │      │   │                     │  │
+│  │  │                                  │      │   │                     │  │
+│  │  │ ┌─ publishEvent (HTTP) ◄─────────┼──────┼───┘                     │  │
+│  │  │ │    │                           │      │                         │  │
+│  │  │ │    │ sends events via SDK      │      │                         │  │
+│  │  │ │    ▼                           │      │                         │  │
+│  │  │ │ ┌────────────────────────┐     │      │                         │  │
+│  │  │ │ │ Event Hub (eastus)     │     │      │                         │  │
+│  │  │ │ │ ehns-eventdemo-mbeals  │     │      │                         │  │
+│  │  │ │ │ └─ eh-events           │     │      │                         │  │
+│  │  │ │ │    └─ $Default         │     │      │                         │  │
+│  │  │ │ └─────────┬──────────────┘     │      │                         │  │
+│  │  │ │           │ triggers           │      │                         │  │
+│  │  │ │           ▼                    │      │                         │  │
+│  │  │ │ processEvent (EH trigger)      │      │                         │  │
+│  │  │ │    │                           │      │                         │  │
+│  │  │ │    │ INSERT INTO events        │      │                         │  │
+│  │  │ │    ▼                           │      │                         │  │
+│  │  │ │ ┌────────────────────────┐     │      │                         │  │
+│  │  │ │ │ Azure SQL (centralus)  │◄────┼──────┘                         │  │
+│  │  │ │ │ sql-eventdemo-mbeals   │     │  ✅ your laptop CAN reach     │  │
+│  │  │ │ │ └─ sqldb-eventdemo     │     │     SQL directly              │  │
+│  │  │ │ │                        │     │                               │  │
+│  │  │ │ │ Firewall rules:        │     │                               │  │
+│  │  │ │ │  ✅ 0.0.0.0 (Azure)   │     │                               │  │
+│  │  │ │ │  ✅ 174.234.2.119     │     │                               │  │
+│  │  │ │ └─────────┬──────────────┘     │                               │  │
+│  │  │ │           │                    │                               │  │
+│  │  │ │           ▼                    │                               │  │
+│  │  │ └─ queryData (HTTP) ─────────────┼─► reads SQL, returns to you   │  │
+│  │  │                                  │                               │  │
+│  │  └──────────────────────────────────┘                               │  │
+│  │                                                                     │  │
+│  │  ┌──────────────────────────────────┐                               │  │
+│  │  │ Storage Account (eastus)      ✅ │ ◄─ Functions runtime uses     │  │
+│  │  │ steventmbeals0403               │    for checkpoints, code, logs │  │
+│  │  └──────────────────────────────────┘                               │  │
+│  │                                                                     │  │
+│  └─────────────────────────────────────────────────────────────────────┘  │
+│                                                                            │
+│  PROVISIONING STATUS:                                                      │
+│  ✅ Resource Group         rg-eventdemo-mbeals04030403                     │
+│  ✅ Event Hubs Namespace   ehns-eventdemo-mbeals04030403                   │
+│  ✅ Event Hub              eh-events ($Default consumer group)             │
+│  ✅ SQL Server             sql-eventdemo-mbeals04030403 (centralus)        │
+│  ✅ SQL Database           sqldb-eventdemo (Serverless, Gen5)              │
+│  ✅ SQL Firewall           AllowMyIP + AllowAzureServices                  │
+│  ✅ Storage Account        steventmbeals0403                               │
+│  ⬜ Function App           func-eventdemo-mbeals04030403  ← NEXT STEP     │
+│                                                                            │
+└──────────────────────────────────────────────────────────────────────────────┘
