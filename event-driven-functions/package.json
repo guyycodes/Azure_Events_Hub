@@ -10,12 +10,12 @@
     "start": "func start"
   },
   "dependencies": {
+    "@azure/event-hubs": "^5.12.2",
     "@azure/functions": "^4.0.0",
-    "@azure/event-hubs": "^5.0.0",
-    "mssql": "^10.0.0"
+    "mssql": "^10.0.4"
   },
   "devDependencies": {
-    "@types/mssql": "^9.0.0",
+    "@types/mssql": "^9.1.11",
     "typescript": "^5.0.0"
   }
 }

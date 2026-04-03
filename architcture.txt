@@ -17,18 +17,26 @@
 │  ┌─ Resource Group: rg-eventdemo-mbeals04030403──┼┼─────────────────────┐  │
 │  │                                            │  ││                     │  │
 │  │  ┌──────────────────────────────────┐      │  ││                     │  │
-│  │  │ Function App (eastus)            │◄─────┼──┘│  ⬜ NOT YET CREATED │  │
+│  │  │ Function App (eastus)         ✅ │◄─────┼──┘│                     │  │
 │  │  │ func-eventdemo-mbeals04030403    │      │   │                     │  │
+│  │  │ Node 24 | Consumption plan       │      │   │                     │  │
+│  │  │ SKU: Dynamic (scale-to-zero)     │      │   │                     │  │
+│  │  │                                  │      │   │                     │  │
+│  │  │ URL: func-eventdemo-mbeals       │      │   │                     │  │
+│  │  │   04030403.azurewebsites.net     │      │   │                     │  │
 │  │  │                                  │      │   │                     │  │
 │  │  │ ┌─ publishEvent (HTTP) ◄─────────┼──────┼───┘                     │  │
 │  │  │ │    │                           │      │                         │  │
 │  │  │ │    │ sends events via SDK      │      │                         │  │
 │  │  │ │    ▼                           │      │                         │  │
 │  │  │ │ ┌────────────────────────┐     │      │                         │  │
-│  │  │ │ │ Event Hub (eastus)     │     │      │                         │  │
+│  │  │ │ │ Event Hub (eastus)  ✅ │     │      │                         │  │
 │  │  │ │ │ ehns-eventdemo-mbeals  │     │      │                         │  │
+│  │  │ │ │  04030403              │     │      │                         │  │
 │  │  │ │ │ └─ eh-events           │     │      │                         │  │
 │  │  │ │ │    └─ $Default         │     │      │                         │  │
+│  │  │ │ │ Basic | 1 partition    │     │      │                         │  │
+│  │  │ │ │ Retention: 24 hours    │     │      │                         │  │
 │  │  │ │ └─────────┬──────────────┘     │      │                         │  │
 │  │  │ │           │ triggers           │      │                         │  │
 │  │  │ │           ▼                    │      │                         │  │
@@ -39,7 +47,11 @@
 │  │  │ │ ┌────────────────────────┐     │      │                         │  │
 │  │  │ │ │ Azure SQL (centralus)  │◄────┼──────┘                         │  │
 │  │  │ │ │ sql-eventdemo-mbeals   │     │  ✅ your laptop CAN reach     │  │
-│  │  │ │ │ └─ sqldb-eventdemo     │     │     SQL directly              │  │
+│  │  │ │ │  04030403           ✅ │     │     SQL directly              │  │
+│  │  │ │ │ └─ sqldb-eventdemo     │     │                               │  │
+│  │  │ │ │    Gen5 Serverless     │     │                               │  │
+│  │  │ │ │    Auto-pause: 60 min  │     │                               │  │
+│  │  │ │ │    ✅ events table     │     │                               │  │
 │  │  │ │ │                        │     │                               │  │
 │  │  │ │ │ Firewall rules:        │     │                               │  │
 │  │  │ │ │  ✅ 0.0.0.0 (Azure)   │     │                               │  │
@@ -54,18 +66,44 @@
 │  │  ┌──────────────────────────────────┐                               │  │
 │  │  │ Storage Account (eastus)      ✅ │ ◄─ Functions runtime uses     │  │
 │  │  │ steventmbeals0403               │    for checkpoints, code, logs │  │
+│  │  │ Standard_LRS                     │                               │  │
+│  │  └──────────────────────────────────┘                               │  │
+│  │                                                                     │  │
+│  │  ┌──────────────────────────────────┐                               │  │
+│  │  │ App Service Plan (eastus)     ✅ │ ◄─ Auto-created by Azure      │  │
+│  │  │ EastUSLinuxDynamicPlan           │    "Dynamic" = Consumption     │  │
+│  │  └──────────────────────────────────┘                               │  │
+│  │                                                                     │  │
+│  │  ┌──────────────────────────────────┐                               │  │
+│  │  │ Application Insights (eastus) ✅ │ ◄─ Auto-created for logs      │  │
+│  │  │ func-eventdemo-mbeals04030403    │    and monitoring              │  │
 │  │  └──────────────────────────────────┘                               │  │
 │  │                                                                     │  │
 │  └─────────────────────────────────────────────────────────────────────┘  │
 │                                                                            │
-│  PROVISIONING STATUS:                                                      │
+│  App Settings (env vars injected into Function App):                       │
+│    ✅ EventHubConnection   → connects to Event Hub namespace               │
+│    ✅ SQL_SERVER            → sql-eventdemo-mbeals04030403.database...      │
+│    ✅ SQL_DATABASE          → sqldb-eventdemo                               │
+│    ✅ SQL_USER              → sqladmin                                      │
+│    ✅ SQL_PASSWORD          → (set)                                         │
+│    ✅ AzureWebJobsStorage   → (auto-configured by az functionapp create)   │
+│                                                                            │
+│  PROVISIONING STATUS — ALL COMPLETE:                                       │
 │  ✅ Resource Group         rg-eventdemo-mbeals04030403                     │
-│  ✅ Event Hubs Namespace   ehns-eventdemo-mbeals04030403                   │
+│  ✅ Event Hubs Namespace   ehns-eventdemo-mbeals04030403 (eastus)          │
 │  ✅ Event Hub              eh-events ($Default consumer group)             │
 │  ✅ SQL Server             sql-eventdemo-mbeals04030403 (centralus)        │
 │  ✅ SQL Database           sqldb-eventdemo (Serverless, Gen5)              │
 │  ✅ SQL Firewall           AllowMyIP + AllowAzureServices                  │
-│  ✅ Storage Account        steventmbeals0403                               │
-│  ⬜ Function App           func-eventdemo-mbeals04030403  ← NEXT STEP     │
+│  ✅ Storage Account        steventmbeals0403 (eastus)                      │
+│  ✅ Function App           func-eventdemo-mbeals04030403 (eastus)          │
+│  ✅ App Service Plan       EastUSLinuxDynamicPlan (auto-created)           │
+│  ✅ Application Insights   func-eventdemo-mbeals04030403 (auto-created)   │
+│  ✅ App Settings           EventHub + SQL creds configured                 │
+│  ✅ SQL Table              events (id, event_type, payload, received_at)   │
+│  ✅ npm install             dependencies installed locally                 │
+│                                                                            │
+│  NEXT: Step 6 → npm run build && npm run start → test with curl            │
 │                                                                            │
 └──────────────────────────────────────────────────────────────────────────────┘

@@ -758,6 +758,39 @@ Before events can be written, the `events` table must exist.
 
 ```sql
 -- Create the events table
+**Easiest way — use the Azure Portal:**
+
+1. Go to https://portal.azure.com
+2. Search for sqldb-eventdemo in the top search bar
+3. Click Query editor in the left sidebar
+4. Log in: sqladmin / your password (P@ssw0rd9364)
+5. Paste and run:
+
+```sql
+CREATE TABLE events (
+    id          INT IDENTITY(1,1) PRIMARY KEY,
+    event_type  NVARCHAR(100)     NOT NULL,
+    payload     NVARCHAR(MAX)     NOT NULL,
+    received_at DATETIME2         NOT NULL
+);
+
+CREATE INDEX IX_events_event_type ON events (event_type);
+CREATE INDEX IX_events_received_at ON events (received_at DESC);
+```
+
+**Or from your terminal (since your IP is in the firewall) from inside /event-driven-functions directory:**
+
+```bash
+sqlcmd -S "sql-eventdemo-mbeals04030403.database.windows.net" \
+       -d sqldb-eventdemo \
+       -U sqladmin \
+       -P "$SQL_ADMIN_PASS" \
+       -i ../scripts/setup-sql.sql
+```
+
+**This is what processEvent writes to and queryData reads from.**
+
+```sql
 -- This is what processEvent writes to and queryData reads from.
 CREATE TABLE events (
     id          INT IDENTITY(1,1) PRIMARY KEY,  -- auto-increment ID
@@ -828,6 +861,17 @@ run().catch(err => { console.error(err); process.exit(1); });
 ```
 
 **Verify:** Run `SELECT COUNT(*) FROM events;` — it should return 0.
+
+
+**or Verify by running:**
+
+```bash
+sqlcmd -S "sql-eventdemo-mbeals04030403.database.windows.net" \
+       -d sqldb-eventdemo \
+       -U sqladmin \
+       -P "$SQL_ADMIN_PASS" \
+       -Q "SELECT COUNT(*) FROM events;"
+```
 
 > **Note:** If your SQL database has auto-paused, the first connection takes ~30-60 seconds while Azure resumes it. This is normal.
 
